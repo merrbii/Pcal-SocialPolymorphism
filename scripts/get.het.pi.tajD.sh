@@ -1,5 +1,5 @@
 #!/bin/bash
-# This script will compute heterozygosity, Nucl. diversity, Tajima's D and Fst using VCFtools.
+# This script will compute heterozygosity, Nucl. diversity and Tajima's D using VCFtools.
 # Errbii M 2021
 
 #get all variables you need..
