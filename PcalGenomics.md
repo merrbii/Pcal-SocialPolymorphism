@@ -317,7 +317,7 @@ To run MSMC2, check ([Schiffels & Wang, 2020](https://link.springer.com/protocol
 
 ##### 1) Calculating nucleotide diversity (&#960;), Tajima's _D_, heterozygosity (and inbreeding) and linkage disequilibrium (LD) from WGS of queens using [VCFtools](https://vcftools.github.io/index.html)
 
-For the first four metrics, use this [script](./scripts/) to calculate these metrics. You will need the filtered vcf file generated after filtering the raw variant calls (i.e. `all_snpsPASS_filtered.vcf`), a text file listing individuals belonging to each population, and finally to specify the window/step size. Then use R (or your favorite software) to make plots and do the stats.
+For the first four metrics, use this [script](./scripts/get.het.pi.tajD.sh) to calculate these metrics. You will need the filtered vcf file generated after filtering the raw variant calls (i.e. `all_snpsPASS_filtered.vcf`), a text file listing individuals belonging to each population, and finally to specify the window/step size. Then use R (or your favorite software) to make plots and do the stats.
 
 For LD, minor allele frequency can affect LD estimates (see for example [Otyama et al. 2019](https://doi.org/10.1186/s12864-019-5824-9)). To minimize the effects of rare variants, only SNPs with a minor allele frequency (MAF) of 0.2 are considered for LD calculation here.
 
