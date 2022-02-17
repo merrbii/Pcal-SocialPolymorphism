@@ -366,31 +366,6 @@ ld0.2 <- read_delim("maf0.2.windowed.ld.forR.tsv", delim = "\t")
 ld0.2$CHROM<- as.numeric(gsub("\\D", "", ld0.2$CHR)) # keep only scaffold number
 sub0.2 <- ld0.2%>%filter(ld0.2$CHROM <= 25) # only 25 scaffolds here!
 
-# Plot LD between markers up to 10 kb, averaged across the genome for each population
-
-decay <- ggplot(sub0.2 %>% filter(sub0.2$dist <= 10000),aes(x = dist/1000, y = meanR2, col = pop)) +
-  geom_smooth(aes(color=pop, fill = pop), method = "loess", level=0.95, span= .1, se=T, size =.6) +
-  scale_fill_manual(values = c("#0075DC", "#2BCE48"),name = "Population")+
-  scale_color_manual(values = c("#0075DC", "#2BCE48"), name = "Population")+
-  theme_bw()+ #xlim(c(0,20))+
-  xlab("Distance (Kb)")+
-  ylab(expression(r^2))+
-  theme(
-    legend.position = c(0.9, 0.6),
-    legend.title = element_blank(),
-    plot.title = element_text(size=10, face = "bold"),
-    legend.text = element_text(size = 8),
-    axis.text.y=element_text(size=8),
-    axis.text.x=element_text(size=7),
-    axis.title.y=element_text(size=8, angle = 0, vjust = 0.5),
-    axis.title.x=element_text(size=8),
-    panel.border = element_blank(), panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")
-  ) + ggtitle("")
-
-
-decay
-
 
 # Plot decay for each scaffold independently
 
@@ -426,7 +401,7 @@ p
 
 ##### 2) Computing genetic differentiation (_F_<sub>ST</sub>) using [VCFtools](https://vcftools.github.io/index.html)
 
-Here, since highly related individuals can lead to inaccurate _F_<sub>ST</sub> estimates between popiulations, it is highly advised to exclude individuals from pairs of high relatedness before calculating _F_<sub>ST</sub>. You can do so using [PLINK](https://www.cog-genomics.org/plink/) as follow:
+Here, since highly related individuals can lead to inaccurate _F_<sub>ST</sub> estimates between populations, it is highly advised to exclude individuals from pairs of high relatedness before calculating _F_<sub>ST</sub>. You can do so using [PLINK](https://www.cog-genomics.org/plink/) as follow:
 
 ```bash
 # first generate a relationship matrix
