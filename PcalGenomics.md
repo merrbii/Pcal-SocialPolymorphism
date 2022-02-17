@@ -563,13 +563,6 @@ write_delim(d5, "combined.fst.pi.tajD.MQ.Cov.forR.tsv", delim = "\t")
 # readable file in excel
 write.table(d5, "combined.fst.pi.tajD.MQ.Cov.forexcel.tsv", sep = "\t", dec = ",", col.names = T, row.names = F)
 
-
-# after visualizing the distribution of these metrics in our dataset
-# we decided to drop out windows with less than a SNP/kb, coverage > 20, MQ < 40.
-data <- df[df$variants >=100 &
-             df$variants < quantile(df$variants, 0.98) & #keep windows with the number of variants bellow the top 2%
-             df$meanMQ >=40 &
-             df$meanCoverage <= 20,]
 ```
 
 
@@ -578,22 +571,24 @@ data <- df[df$variants >=100 &
 To detect signatures of selective sweeps, we  applied an _F_<sub>ST</sub> outlier approach (more in [Kelley et al. 2006](https://genome.cshlp.org/content/16/8/980) and [Akey et al. 2010](https://doi.org/10.1073/pnas.0909918107)) and used the cross-population extended haplotype homozygosity (_xpEHH_) and the site-specific extended haplotype homozygosity (_EHHS_) tests ([Sabeti et al. 2007](https://doi.org/10.1038/nature06250) and [Tang et al. 2007](
 https://doi.org/10.1371/journal.pbio.0050171)).
 
-We only used unrelated individuals from each population to perform the scans **[Computing genetic differentiation (_F_<sub>ST</sub>) using VCFtools**)](https://github.com/merrbii/Pcal-SocialPolymorphism/blob/main/PcalGenomics.md#2-computing-genetic-differentiation-fst-using-vcftools)
+We only used unrelated individuals from each population to perform the scans [Computing genetic differentiation (_F_<sub>ST</sub>) using VCFtools](https://github.com/merrbii/Pcal-SocialPolymorphism/blob/main/PcalGenomics.md#2-computing-genetic-differentiation-fst-using-vcftools)
 
 ##### 1) Getting _F_<sub>ST</sub> outlier windows
 
-We calculated _F_<sub>ST</sub> above and have generated a single file giving not only _F_<sub>ST</sub> estimates, but also others (e.g. π, Tajima's D and mean MQ) in 100 kb non-overlapping windows across the genome. Now in R:
+We calculated _F_<sub>ST</sub> above and have generated a single file containing not only _F_<sub>ST</sub> estimates, but also others (e.g. &#960;, Tajima's _D_ and mean MQ) in 100 kb non-overlapping windows across the genome. Now in R:
 
 ```R
 # read data
 df <-read_delim("combined.fst.pi.tajD.MQ.Cov.forR.tsv", delim = "\t", col_names = T)
 df<- na.omit(df)
 
-# apply filters based on variant number, MQ and coverage
+# after visualizing the distribution of these metrics in our dataset
+# we decided to drop out windows with less than a SNP/kb, coverage > 20, MQ < 40.
 data <- df[df$variants >=100 &
-             df$variants < quantile(df$variants, 0.98) &
+             df$variants < quantile(df$variants, 0.98) & #keep windows with the number of variants bellow the top 2%
              df$meanMQ >=40 &
              df$meanCoverage <= 20,]
+             
 
 # get Fst estimates from the combined data file
 fst <- data[,c(1:6)]
@@ -629,10 +624,10 @@ outliersd <- data[data$Fst >quantile(abs(data$Fst), 0.95),]
 
 # in which population there is selection? based on pi and Tajima's D estimates
 # logic here is that selection will lead to reduced diversity (tajima's D) in the population where it's acting
+
 outliersd <- mutate(outliersd, selection= ifelse(outliersd$tajDPle < outliersd$tajDHap & outliersd$piPle < outliersd$piHap, "pleometrotic", ifelse(outliersd$tajDPle > outliersd$tajDHap & outliersd$piPle > outliersd$piHap, "haplometrotic", "ambiguous")))
 
 # store this file!!
-
 write_delim(outliersd, "~/candidate.region.q95.forR.tsv", delim = "\t")
 
 # ambiguous windows where it's hard to decide were droped out
@@ -651,8 +646,8 @@ vcftools --gzvcf Onlyphased.merged.vcf.gz --keep unrelated.pleo.txt --recode --o
 vcftools --gzvcf Onlyphased.merged.vcf.gz --keep unrelated.haplo.txt --recode --out Onlyphased.merged.unrel.haplo
 
 # get data for each scaffold individually
-for i in {1..27}; do bcftools view -r scaffold_$i Onlyphased.merged.unrel.pleo.vcf.gz -Ov -o ~/rehh.run/pleo.scaffold_$i.vcf; done
-for i in {1..27}; do bcftools view -r scaffold_$i Onlyphased.merged.unrel.haplo.vcf.gz -Ov -o ~/rehh.run/haplo.scaffold_$i.vcf; done
+for i in {1..25}; do bcftools view -r scaffold_$i Onlyphased.merged.unrel.pleo.vcf.gz -Ov -o ~/rehh.run/pleo.scaffold_$i.vcf; done
+for i in {1..25}; do bcftools view -r scaffold_$i Onlyphased.merged.unrel.haplo.vcf.gz -Ov -o ~/rehh.run/haplo.scaffold_$i.vcf; done
 ```
 * ###### Running the _xpEHH_ analysis using rehh in R
 
@@ -709,7 +704,6 @@ for(i in 1:25) {
 
 
 
-
 # Now perform an xp-ehh analysis: The xpEHH compares the length of haplotypes between populations
 # to detect selective sweeps in which the selected allele has approached or reached fixation in
 # at least one population
@@ -733,7 +727,7 @@ wgscan.haplo.pleo.xpehh.qqman <- data.frame(
   SNP = row.names(haplo_pleo)       # SNP names
 )
 
-  # write out haplo pleo xpEHH
+# write out haplo pleo xpEHH
 tib <- as_tibble(wgscan.haplo.pleo.xpehh.qqman)
 
 # save the final results for further processing
@@ -741,7 +735,6 @@ write_tsv(tib, "~/rehh.main/haplo.pleo.25scf.xpEHH.tsv")
 
 
 # now extract outlier SNPs (p < 0.05) and then get candidate regions
-
 # identify and cluster outliers:
 myData <- tib
 myData <- filter(myData, P < 0.05)
@@ -749,10 +742,10 @@ myData <- arrange(myData, CHR, BP)
 
 # cluster outlier SNPs into regions (if they are less than 100 kb away)
 threshold <- 100000
-clust <- unlist(sapply(unique(myData$CHR), function(w){
-y <- filter(myData, CHR == w) %>% .$BP
-y <- cumsum(c(1, diff(y) > threshold))
-paste0(w, "_", y)
+clust <- unlist(sapply(unique(myData$CHR), function(i){
+j <- filter(myData, CHR == i) %>% .$BP
+j <- cumsum(c(1, diff(j) > threshold))
+paste0(i, "_", j)
 }))
 names(clust) <- NULL
 myData$cluster <- factor(clust)
@@ -781,7 +774,6 @@ The resulting file can then be used to extract candidates for positive selective
 library(rehh)
 
 #scaffold 15: id174340 (most sgnificant SNP)
-
 # read in data for each population
 # haplo
 haplo_hh <- data2haplohh(hap_file = "~/rehh.main/haplo.scaffold_15.vcf",
@@ -843,8 +835,9 @@ scf15
 
 **Scaffold_16**
 ```R
-# Scaffold 16 : id184640
+library(rehh)
 
+# Scaffold 16 : id184640
 # read in data for each population
 # haplo
 haplo_hh <- data2haplohh(hap_file = "~/rehh.main/haplo.scaffold_16.vcf",
@@ -916,7 +909,7 @@ cat top.sig.snp.in.each.cluster.25scf.forR.tsv |grep -v "^C"| grep "pleometrotic
 cat top.sig.snp.in.each.cluster.25scf.forR.tsv |grep -v "^C"| grep "haplometrotic"|awk 'OFS=OF="\t" {print "scaffold_"$1, $2-100000, $2+100000, $2}' | bedtools merge -i - > candidate.regions.within.100kb.25scf.pleo.merged.bed
 
 
-# get candidate regions from Fst analysis:
+# get candidate regions from _F_<sub>ST</sub> analysis:
 ## Pleo
 cat candidate.region.q95.forR.tsv |grep -v "^chr"| grep "pleometrotic"|awk 'OFS=OF="\t" {print "scaffold_"$1, $2, $3}'| bedtools merge -i - > candidate.regions.in.pleo.merged.bed
 
@@ -966,24 +959,6 @@ mv *longestIsoform.fa OrthoInputs
 orthofinder -f OrthoInputs/ -t 20
 ```
 
-
-* **_Search for candidate genes differentially expressed in [Helmkampf et al. (2016)](https://doi.org/10.1111/mec.13700)_**
-
-```bash
-# Download the 7890 assembled and filtered transcripts (Appendix S1) from https://onlinelibrary.wiley.com/doi/10.1111/mec.13700
-# make blast db (edited header sed -e 's/\ .*//' mec13700-sup-0002-appendixs1.fas)
-
-makeblastdb -in mec13700-sup-0002-appendixs1.fas -dbtype nucl -title "db" -out "transcripts"
-
-# extract exons from candidate regions
-bedtools intersect -wa -a Pogonomyrmex_californicus.gff3 -b 17.candidates.regions.from.both.pleo.analyses.bed|awk '{if ($3=="exon") print $0}'|gff2bed|sort|uniq|sort -k1,1V -k2,2n > candidate.exons.pleo.bed
-
-# and Then
-bedtools  getfasta -fi Pcal.genome.clean.sort.masked.fa -bed candidate.exons.pleo.bed -fo candidate.exons.pleo.fa -name
-
-# blast
-blastn -query candidate.exons.pleo.fa -db db/transcripts.fa -max_target_seqs 1 -max_hsps 5 -out candidate.exons.pleo.tsv -outfmt 6
-```
 
 * **_Genotype phenotype association_**
 Prepare input files for R.
@@ -1221,6 +1196,24 @@ cat Pogonomyrmex_californicus.gff3 | awk '{if ($3=="gene") print $0}'|bedtools s
 #then calculate coverage
 $ sortBed -i GENE.sorted.gff | gff2bed  |bedmap --echo --bases-uniq-f 100kbwindows.bed - |tr "|" "\t" > 100kbwindows.GENEcontent.bed
 ```
+
+* **_Mapping of transcripts from [Helmkampf et al. (2016)](https://doi.org/10.1111/mec.13700)_**
+
+```bash
+# Download the 7890 assembled and filtered transcripts (Appendix S1) from https://onlinelibrary.wiley.com/doi/10.1111/mec.13700
+
+# map transcripts to the Pcal2 reference genome
+~/programs/gmap-2021-12-17/src/gmap -d Pcal2 -D ~/programs/gmap-2021-12-17/share/ -f gff3_gene db/transcripts.fa
+
+# and then get IDs transcripts mapping to the supergene
+awk '{if ($3=="mRNA") print $0}' transcriptsAlignedtoPcal2.summary.gff > mRNA.AlignedtoPcal2.gff
+
+paste <(cut -f1,4,5,7 mRNA.AlignedtoPcal2.gff3) <(cut -f9 mRNA.AlignedtoPcal2.gff3|tr ";" "\t")|sort -V -k6,6 -k9,9n|sort -k6,6 -u -s|sed 's/coverage=//g'|sort -k9,9n|awk '{if ($9>=70) print $0}' > transcriptsAlignedtoPcal2.unambigously.gff
+
+bedtools intersect -wa -a transcriptsAlignedtoPcal2.unambigously.summary.gff -b superegen.regions.bed |cut -f6|sed 's/Name=//'|sort |uniq > transcriptsIntheSupergene.unambigous.txt
+
+```
+
 ### VII- Dating the supergene
 ###### computing the rCCR bteween Sh and Sp
 MSMC2 was used to compute rCCR between Sh and Sp using four Sh queens and four Sp queens. To do so we extracted SNPs found on scaffolds 22, 23 and parts of 6 (parts of the supergene that are > 1 Mb).
