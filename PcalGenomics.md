@@ -1,6 +1,5 @@
-# PcalGenomics
 # Bioinformatic pipeline used to analyze population genomic and linkage mapping data of _Pogonomyrmex californicus_
-###### By Mohammed Errbii "Simo"
+
 
 This markdown document gives a detailed description of the bioinformatic pipeline used to analyze WGS of queens and RADseq of males of _Pogonomyrmex californicus_. Check out our [manuscript](https://www.biorxiv.org/content/10.1101/2021.03.21.436260v1.abstract) for further details on our research hypotheses and major findings.
 
