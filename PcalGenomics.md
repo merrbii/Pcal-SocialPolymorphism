@@ -578,7 +578,7 @@ data <- df[df$variants >=100 &
 To detect signatures of selective sweeps, we  applied an _F_<sub>ST</sub> outlier approach (more in [Kelley et al. 2006](https://genome.cshlp.org/content/16/8/980) and [Akey et al. 2010](https://doi.org/10.1073/pnas.0909918107)) and used the cross-population extended haplotype homozygosity (_xpEHH_) and the site-specific extended haplotype homozygosity (_EHHS_) tests ([Sabeti et al. 2007](https://doi.org/10.1038/nature06250) and [Tang et al. 2007](
 https://doi.org/10.1371/journal.pbio.0050171)).
 
-We only used unrelated individuals from each population to perform the scans (see **2) Computing genetic differentiation (_F_<sub>ST</sub>) using VCFtools**)
+We only used unrelated individuals from each population to perform the scans **[Computing genetic differentiation (_F_<sub>ST</sub>) using VCFtools**)](https://github.com/merrbii/Pcal-SocialPolymorphism/blob/main/PcalGenomics.md#2-computing-genetic-differentiation-fst-using-vcftools)
 
 ##### 1) Getting _F_<sub>ST</sub> outlier windows
 
