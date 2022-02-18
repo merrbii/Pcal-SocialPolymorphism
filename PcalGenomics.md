@@ -1,7 +1,7 @@
 # Bioinformatic pipeline used to analyze population genomic and linkage mapping data of _Pogonomyrmex californicus_
 
 
-This markdown document gives a detailed description of the bioinformatic pipeline used to analyze WGS of queens and RADseq of males of _Pogonomyrmex californicus_. Check out our [manuscript](https://www.biorxiv.org/content/10.1101/2021.03.21.436260v1.abstract) for further details on our research hypotheses and major findings.
+This markdown document gives a detailed description of the bioinformatic pipeline used to analyze WGS of queens and RADseq of males of _Pogonomyrmex californicus_. Check out our [manuscript](https://www.biorxiv.org/content/10.1101/2021.03.21.436260v2).
 
 ### I- Mapping, variant calling and filtering
 ##### 1) Filter raw reads for paired reads with a BQ > 20 and a minimum length > 40bp using [Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic)
