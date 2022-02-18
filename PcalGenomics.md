@@ -974,21 +974,23 @@ bcftools query -f '%ANN\n' shared.snps.ann.in.145genes.haplo.vcf |tr -s "|"|tr "
 
 
 # get genotypes for haplo queens
-view -S haplo.txt -Ov -o shared.snps.ann.in.145genes.haplo.vcf shared.snps.ann.in.145genes.vcf # haplo.txt lists queen names
+bcftools view -S haplo.txt -Ov -o shared.snps.ann.in.145genes.haplo.vcf shared.snps.ann.in.145genes.vcf # haplo.txt lists queen names
 # next
 bcftools query -f '%CHROM\t%POS\t%ALT[\t%GT]\n' shared.snps.ann.in.145genes.haplo.vcf > genotypes.haplo.forR.tsv
 
 # get genotypes for pleo queens
-view -S pleo.txt -Ov -o shared.snps.ann.in.145genes.pleo.vcf shared.snps.ann.in.145genes.vcf # pleo.txt lists queen names
+bcftools view -S pleo.txt -Ov -o shared.snps.ann.in.145genes.pleo.vcf shared.snps.ann.in.145genes.vcf # pleo.txt lists queen names
 # next
 bcftools query -f '%CHROM\t%POS\t%ALT[\t%GT]\n' shared.snps.ann.in.145genes.pleo.vcf > genotypes.pleo.forR.tsv
 
 # get list of genes with effects
 bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t%ANN\n' shared.snps.ann.in.145genes.haplo.vcf| tr -s "|"|tr "," "\n" > listOfgenesWithEffect.tmp.tsv
+
 # had to manually edit the listOfgenesWithEffect.tmp.tsv file
 # some entries will be missing the first four columns ()<scaffold><position><REF><ALT>)
-# this is because some SNPs affect more than one gene.
+# this is because some SNPs can have effects onmore than one gene.
 # after doing so
+
 cat listOfgenesWithEffect.tmp.tsv |tr "|" "\t"|cut -f1-8 > listOfgenesWithEffect.tmp.tsv
 ```
 Now in R combine all relevant information into one file and get genotype count.
@@ -1039,7 +1041,7 @@ com2 <- full_join(dplyr::select(com,c(V1:V8, Href,Halt,Hmissing)),
 # save file containing for each candidate gene: the position, ref and alt alleles, type of effect, gene ID and the number of queens carrying the ref/alt allele
 write.table(com2, "genotypephenotype.withmissingCount.tsv", quote = F,col.names = T, row.names = F, sep = "\t")
 
-# This files was used to filter the candidate genes and to narrow down the list to only 38 genes (with six very interesing ones)
+# This files was used to manually screen our candidate genes
 ```
 
 ### V- RAD sequencing and analysis
@@ -1050,11 +1052,13 @@ Raw RADseq reads were first filtered from adapter sequences using [Trimmomatic](
 # after generating bamfiles and sorting them:
 # inside the folder with all alignment files:
 perl ~/programs/STACKS/bin/ref_map.pl -T 30 --popmap ./popmap2.tsv -o ./stacks.2/ --samples ./
+
 #popmap2.tsv is a two-columns files column 1 is the bam alignment file name for each sample
 #the second column is population (for DNA_1.bam it will be <DNA_1><pop1>)
 
 # Once the ref_map.pl is done
 mkdir vcf
+
 # then 	
 ~/programs/STACKS/bin/populations -P ./stacks.2/ -O ./vcf/ vcf
 ```
@@ -1063,22 +1067,21 @@ Next, to obtain a set of reliable markers from the raw calls, use VCFtools (to k
 ```bash
 vcftools --vcf populations.snps.1pop.vcf --recode-INFO-all --maf 0.45 --max-alleles 2 --min-alleles 2 --max-missing 1 --out populations.snps.1pop.biall.no-miss.maf.45 --recode
 ```
-Finally, we excluded heterozygous calls, likely to be sequencing errors (males are haploid and therefore should not present heterozygous calls). To properly handle the vcf file using bcftools, first add missing contig information to the header (there are probably more efficient ways to do it).
+Finally, we excluded positions with heterozygous calls, likely to be sequencing errors (males are haploid and therefore should not present heterozygous calls). To properly handle the vcf file using bcftools, first add missing contig information to the header (there are probably more efficient ways to do it).
 ```bash
 # get scaffold information
 awk '{printf("##contig=<ID=%s,length=%d>\\n",$1,$2);}' Pcal2.reference.fa.fai # can be obtained by running samtools faidx Pcal2.reference.fa
 
 awk '/^#CHROM/ { printf("REPLACE WITH OUTPUT FROM PREVIOUS COMMAND");} {print;}' populations.snps.1pop.biall.no-miss.maf.45.vcf > populations.snps.1pop.biall.no-miss.maf.45.header.vcf
 
-# get only homozygous calls
+# get only homozygous sites with calls
 grep -v -w "0/1" populations.snps.1pop.biall.no-miss.maf.45.header.vcf > populations.snps.1pop.biall.no-miss.maf.45.header.Hom.vcf
 
 # prepare marker for Multipoint
 bcftools query -f '%CHROM\t%POS\t[\t%GT]\n' populations.snps.1pop.biall.no-miss.maf.45.header.Hom.vcf > populations.snps.1pop.biall.no-miss.maf.45.header.Hom.tsv
 
 # diploid to haploid markers
-sed -i '' "s@1/1@1@g" populations.snps.1pop.biall.no-miss.maf.45.header.Hom.tsv
-sed -i '' "s@0/0@0@g" populations.snps.1pop.biall.no-miss.maf.45.header.Hom.tsv
+cat populations.snps.1pop.biall.no-miss.maf.45.header.Hom.tsv|sed 's@1/1@1@g'|sed 's@0/0@0@g' > tmp && mv tmp populations.snps.1pop.biall.no-miss.maf.45.header.Hom.tsv
 ```
 ### VI- Characterization of the supergene
 
