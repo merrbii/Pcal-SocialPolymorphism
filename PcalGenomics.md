@@ -1127,6 +1127,7 @@ plink --bfile ../merged.1064.snps.b --extract range range.txt --pca 4 --aec --ou
 # <Chrom><start><end><id(random)>
 ```
 **_Pairwise LD at LG14 using [LDheatmap](https://sfustatgen.github.io/LDheatmap/)_**
+
 Use [flo]() to generate a chain file. initially flo is designed to lift over genome annotations, but if no genome annotation is provided, the program will stop after generating a chain file. Check the [flo]() repository for a detailed description of how to proceed. Next use [Picard's LiftoverVcf](https://gatk.broadinstitute.org/hc/en-us/articles/360037060932-LiftoverVcf-Picard-) to lift over SNPs from scaffolds 22, 23, 38, 42, 48, and parts of 6 and 14 to one linkage group (LG14).
 ```bash
 java -jar picard.jar LiftoverVcf I=biall.mac3.miss.85.3DP24.recode.vcf O=LG14.biall.mac3.miss.85.3DP24.liftedover.vcf CHAIN=liftover.chn REJECT=rejected_variants.vcf R=LG14.fa
@@ -1220,6 +1221,7 @@ bedtools intersect -wa -a transcriptsAlignedtoPcal2.unambigously.summary.gff -b 
 
 ### VII- Dating the supergene
 ###### computing the rCCR bteween Sh and Sp
+
 MSMC2 was used to compute rCCR between Sh and Sp using four Sh queens and four Sp queens. To do so we extracted SNPs found on scaffolds 22, 23 and parts of 6 (parts of the supergene that are > 1 Mb).
 
 ```bash
