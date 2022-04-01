@@ -435,19 +435,18 @@ awk -v OFS='\t' {'print $1,$2'} Pcal2.reference.fa.fai > Pcal2.genome.txt
 bedtools makewindows -g Pcal2.genome.txt -w 100000 -s 100000 > Pcal2.100kbwindows.bed
 
 ## calculate mean MQ per window from each alignment file. Here I use parallel to speed up the process
-ls *.bam|parallel --jobs 3 'bedtools map -a Cobs2.1.100kbwindows.bed -b <(bedtools bamtobed -i {}) -c 5 -o mean > {.}.mapping' # {} will be replaced by an alignment file to be processed. See (https://www.gnu.org/software/parallel/parallel_tutorial.html) for more information on parallel.
+ls *.bam|parallel --jobs 3 'bedtools map -a Pcal2.100kbwindows.bed -b <(bedtools bamtobed -i {}) -c 5 -o mean > {.}.mapping' # {} will be replaced by an alignment file to be processed. See (https://www.gnu.org/software/parallel/parallel_tutorial.html) for more information on parallel.
 
 ## prepare for R
 for i in *.mapping; do sed -i "s/scaffold//g" $i ;done # keep only scaffold numbers
 for i in *.mapping; do base=$(echo $i|cut -f1 -d.); awk 'BEGIN {OFS=FS="\t"} $4 == "." {$4="NA"}1' $i > $base.forR;done #replace missing (.) with NA
-
 
 #############
 # Coverage #
 #############
 
 ## calculate mean coverage per window for each alignment file
-ls *.bam|parallel --jobs 30 'samtools bedcov Cobs2.1.100kbwindows.bed {} > {.}.bedcov' # same, {} will be replaced by a file to be processed from ls *.bam
+ls *.bam|parallel --jobs 30 'samtools bedcov Pcal2.100kbwindows.bed {} > {.}.bedcov' # same, {} will be replaced by a file to be processed from ls *.bam
 
 ## prepare for R
 for i in *.bedcov; do base=$(echo $i|cut -f1 -d.); awk 'OFS=FS="\t" {print $1,$2,$3,$4,$4/100000}' $i > $base.forR;done
