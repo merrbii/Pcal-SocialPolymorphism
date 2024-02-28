@@ -1210,11 +1210,11 @@ $ sortBed -i GENE.sorted.gff | gff2bed  |bedmap --echo --bases-uniq-f 100kbwindo
 ~/programs/gmap-2021-12-17/src/gmap -d Pcal2 -D ~/programs/gmap-2021-12-17/share/ -f gff3_gene db/transcripts.fa
 
 # and then get IDs transcripts mapping to the supergene
-awk '{if ($3=="mRNA") print $0}' transcriptsAlignedtoPcal2.summary.gff > mRNA.AlignedtoPcal2.gff
+awk '{if ($3=="mRNA") print $0}' transcriptsAlignedtoPcal2.summary.gff3 > mRNA.AlignedtoPcal2.gff3
 
 paste <(cut -f1,4,5,7 mRNA.AlignedtoPcal2.gff3) <(cut -f9 mRNA.AlignedtoPcal2.gff3|tr ";" "\t")|sort -V -k6,6 -k9,9n|sort -k6,6 -u -s|sed 's/coverage=//g'|sort -k9,9n|awk '{if ($9>=70) print $0}' > transcriptsAlignedtoPcal2.unambigously.gff
 
-bedtools intersect -wa -a transcriptsAlignedtoPcal2.unambigously.summary.gff -b superegen.regions.bed |cut -f6|sed 's/Name=//'|sort |uniq > transcriptsIntheSupergene.unambigous.txt
+bedtools intersect -wa -a transcriptsAlignedtoPcal2.unambigously.gff -b superegen.regions.bed |cut -f6|sed 's/Name=//'|sort |uniq > transcriptsIntheSupergene.unambigous.txt
 
 ```
 
