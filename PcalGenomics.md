@@ -1084,7 +1084,7 @@ cat populations.snps.1pop.biall.no-miss.maf.45.header.Hom.tsv|sed 's@1/1@1@g'|se
 ```
 ### VI- Characterization of the supergene
 
-####**_Visualizing genotypes of males and queens at LG14 using [VIVA](https://compbiocore.github.io/VariantVisualization.jl/latest/)_**
+#### **_Visualizing genotypes of males and queens at LG14 using [VIVA](https://compbiocore.github.io/VariantVisualization.jl/latest/)_**
 
 ```bash
 # extract SNPs shared between males (linkage map) and queens (pop gen)
@@ -1112,7 +1112,7 @@ vcftools --gzvcf Pcal.BQSR.snpsPass.biall.mac3.miss.85.3DP24.vcf.gz --chr scaffo
 viva -f Pcal.BQSR.snpsPass.biall.mac3.miss.85.3DP24.LGsupergene.thinned.vcf --heatmap genotype -g pop.meta.csv haplometrotic,pleometrotic -x --save_remotely -o genotype_supergene.queens.snps
 
 ```
-####**_PCA on SNPs found in the non-recombining supergene_**
+#### **_PCA on SNPs found in the non-recombining supergene_**
 
 ```bash
 # convert vcf to plink format
@@ -1125,7 +1125,7 @@ plink --bfile ../merged.1064.snps.b --extract range range.txt --pca 4 --aec --ou
 # ranges.txt is tab delimited files with four columns giving the supergene coordinates for each scaffold (rows)
 # <Chrom><start><end><id(random)>
 ```
-####**_Pairwise LD at LG14 using [LDheatmap](https://sfustatgen.github.io/LDheatmap/)_**
+#### **_Pairwise LD at LG14 using [LDheatmap](https://sfustatgen.github.io/LDheatmap/)_**
 
 Use [flo](https://github.com/wurmlab/flo) to generate a chain file. initially flo is designed to lift over genome annotations, but if no genome annotation is provided, the program will stop after generating a chain file. Check the [flo](https://github.com/wurmlab/flo) repository for a detailed description of how to proceed. Next use [Picard's LiftoverVcf](https://gatk.broadinstitute.org/hc/en-us/articles/360037060932-LiftoverVcf-Picard-) to lift over SNPs from scaffolds 22, 23, 38, 42, 48, and parts of 6 and 14 to one linkage group (LG14).
 ```bash
@@ -1173,7 +1173,7 @@ shsp <- vcfR2SnpMatrix(vcf)
 
 LDheatmap(shsp$data, shsp$genetic.distance, title='pooled Sh & Sp queens', add.map=T, flip = T, color = mypalette)
 ```
-####**_TE and gene content_**
+#### **_TE and gene content_**
 
 ```bash
 
